@@ -1,0 +1,39 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{B04C4B3D-C137-4660-AB2E-F8D5C8A7F73A}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="DemoApp.dpr">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType>Default</Borland.ProjectType>
+        <BorlandProject>
+            <Default.Personality>
+                <Projects>
+                    <Project FileName="DemoApp.dpr" Dependencies="" />
+                </Projects>
+            </Default.Personality>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="DemoApp">
+        <MSBuild Projects="DemoApp.dpr"/>
+    </Target>
+    <Target Name="DemoApp:Rebuild">
+        <MSBuild Projects="DemoApp.dpr" Targets="Rebuild"/>
+    </Target>
+    <Target Name="DemoApp:Clean">
+        <MSBuild Projects="DemoApp.dpr" Targets="Clean"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="DemoApp"/>
+    </Target>
+    <Target Name="Rebuild">
+        <CallTarget Targets="DemoApp:Rebuild"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="DemoApp:Clean"/>
+    </Target>
+</Project>
