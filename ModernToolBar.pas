@@ -87,7 +87,6 @@ type
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
   protected
     procedure CreateParams(var Params: TCreateParams); override;
-    procedure Paint; override;
     procedure Resize; override;
     procedure DoContextPopup(MousePos: TPoint; var Handled: Boolean); override;
   public
@@ -112,24 +111,20 @@ type
     property AnimateButtons: Boolean read FAnimateButtons write FAnimateButtons default False;
   end;
 
-  // Кастомна кнопка тулбара з анімацією
+  // Кастомна кнопка тулбара з ефектами
   TModernToolButton = class(TToolButton)
   private
-    FHoverAlpha: Byte;
-    FAnimationTimer: TTimer;
-    FIsHovering: Boolean;
     FIconName: string;
     FModernToolBar: TModernToolBar;
+    FIsHovering: Boolean;
     
-    procedure OnAnimationTimer(Sender: TObject);
-    procedure StartHoverAnimation(ADirection: Integer);
+    procedure WMMouseMove(var Message: TWMMouseMove); message WM_MOUSEMOVE;
+    procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
+    procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
   protected
-    procedure MouseEnter; override;
-    procedure MouseLeave; override;
     procedure Paint; override;
   public
     constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
     
     property IconName: string read FIconName write FIconName;
     property ModernToolBar: TModernToolBar read FModernToolBar write FModernToolBar;
@@ -571,16 +566,7 @@ begin
     '<svg width="24" height="24" viewBox="0 0 24 24"><path d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z"/></svg>');
 end;
 
-procedure TModernToolBar.Paint;
-begin
-  inherited;
-  
-  // Додаткове малювання для сучасного вигляду
-  if FHoverEffect then
-  begin
-    // Тут можна додати додаткові ефекти
-  end;
-end;
+
 
 procedure TModernToolBar.Resize;
 begin
@@ -622,100 +608,59 @@ constructor TModernToolButton.Create(AOwner: TComponent);
 begin
   inherited;
   
-  FHoverAlpha := 0;
   FIsHovering := False;
   FIconName := '';
-  
-  FAnimationTimer := TTimer.Create(Self);
-  FAnimationTimer.Interval := 20;
-  FAnimationTimer.Enabled := False;
-  FAnimationTimer.OnTimer := OnAnimationTimer;
 end;
 
-destructor TModernToolButton.Destroy;
-begin
-  FAnimationTimer.Free;
-  inherited;
-end;
-
-procedure TModernToolButton.MouseEnter;
+procedure TModernToolButton.CMMouseEnter(var Message: TMessage);
 begin
   inherited;
   
   if (FModernToolBar <> nil) and FModernToolBar.HoverEffect then
   begin
     FIsHovering := True;
-    if FModernToolBar.AnimateButtons then
-      StartHoverAnimation(1)
-    else
-    begin
-      FHoverAlpha := 30;
-      Invalidate;
-    end;
+    Invalidate;
   end;
 end;
 
-procedure TModernToolButton.MouseLeave;
+procedure TModernToolButton.CMMouseLeave(var Message: TMessage);
 begin
   inherited;
   
   if (FModernToolBar <> nil) and FModernToolBar.HoverEffect then
   begin
     FIsHovering := False;
-    if FModernToolBar.AnimateButtons then
-      StartHoverAnimation(-1)
-    else
-    begin
-      FHoverAlpha := 0;
-      Invalidate;
-    end;
+    Invalidate;
   end;
 end;
 
-procedure TModernToolButton.StartHoverAnimation(ADirection: Integer);
+procedure TModernToolButton.WMMouseMove(var Message: TWMMouseMove);
 begin
-  FAnimationTimer.Tag := ADirection;
-  FAnimationTimer.Enabled := True;
-end;
-
-procedure TModernToolButton.OnAnimationTimer(Sender: TObject);
-var
-  Step: Integer;
-begin
-  Step := FAnimationTimer.Tag * 5;
-  
-  FHoverAlpha := FHoverAlpha + Step;
-  
-  if FHoverAlpha <= 0 then
-  begin
-    FHoverAlpha := 0;
-    FAnimationTimer.Enabled := False;
-  end
-  else if FHoverAlpha >= 30 then
-  begin
-    FHoverAlpha := 30;
-    FAnimationTimer.Enabled := False;
-  end;
-  
-  Invalidate;
+  inherited;
+  // Простий обробник руху миші
 end;
 
 procedure TModernToolButton.Paint;
 var
   R: TRect;
+  OldBrushColor: TColor;
+  OldBrushStyle: TBrushStyle;
 begin
   inherited;
   
   // Малюємо ефект наведення
-  if (FHoverAlpha > 0) and (FModernToolBar <> nil) and FModernToolBar.HoverEffect then
+  if FIsHovering and (FModernToolBar <> nil) and FModernToolBar.HoverEffect then
   begin
     R := ClientRect;
-    Canvas.Brush.Color := clHighlight;
-    Canvas.Brush.Style := bsSolid;
+    OldBrushColor := Canvas.Brush.Color;
+    OldBrushStyle := Canvas.Brush.Style;
     
-    // Використовуємо альфа-блендинг для плавного ефекту
-    SetBkMode(Canvas.Handle, TRANSPARENT);
-    Canvas.Rectangle(R);
+    Canvas.Brush.Color := RGB(200, 200, 200);
+    Canvas.Brush.Style := bsSolid;
+    Canvas.FillRect(R);
+    
+    Canvas.Brush.Color := OldBrushColor;
+    Canvas.Brush.Style := OldBrushStyle;
   end;
 end;
 

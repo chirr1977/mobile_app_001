@@ -67,6 +67,19 @@ ToolBar.AddButton('Зберегти', 'save', @OnSaveClick);
 2. **Search Path** - додайте папку проекту до Library Path
 3. **VCL компоненти** - переконайтеся, що VCL включено в проект
 
+### ✅ Швидка перевірка компіляції:
+
+```
+Відкрийте TestCompile.pas і натисніть F9
+Це перевірить, що всі модулі правильно компілюються
+```
+
+### 🔧 Виправлені проблеми:
+
+- ✅ `Method 'Paint' not found in base class` - виправлено
+- ✅ `Method 'MouseEnter' not found in base class` - замінено на повідомлення
+- ✅ `Method 'MouseLeave' not found in base class` - замінено на повідомлення
+
 ## 📞 Підтримка
 
 - Перегляньте повну документацію в `README.md`
