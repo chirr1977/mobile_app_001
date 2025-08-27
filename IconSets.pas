@@ -190,6 +190,8 @@ uses
 { TIconSet }
 
 constructor TIconSet.Create(const AName: string; ASetType: TIconSetType);
+var
+  Category: TIconCategory;
 begin
   inherited Create;
   
@@ -200,7 +202,6 @@ begin
   FDefaultStyle := isOutlined;
   
   // Ініціалізуємо категорії
-  var Category: TIconCategory;
   for Category := Low(TIconCategory) to High(TIconCategory) do
     FCategories.Add(Category, TStringList.Create);
 end;
@@ -238,6 +239,7 @@ var
   I: Integer;
   IconInfo: TIconInfo;
   IconName: string;
+  TagsStr: string;
 begin
   if not FileExists(ConfigFile) then
     Exit;
@@ -271,7 +273,7 @@ begin
       IconInfo.Version := IniFile.ReadString(IconName, 'Version', FVersion);
       
       // Завантажуємо теги
-      var TagsStr := IniFile.ReadString(IconName, 'Tags', '');
+      TagsStr := IniFile.ReadString(IconName, 'Tags', '');
       if TagsStr <> '' then
         IconInfo.Tags := TagsStr.Split([',', ';'])
       else
@@ -865,6 +867,8 @@ end;
 { TIconSetFactory }
 
 class function TIconSetFactory.CreateMaterialIconSet: TIconSet;
+var
+  IconInfo: TIconInfo;
 begin
   Result := TIconSet.Create('material', istMaterial);
   Result.DisplayName := 'Material Design Icons';
@@ -877,7 +881,6 @@ begin
   Result.DefaultStyle := isOutlined;
   
   // Додаємо базові іконки Material Design
-  var IconInfo: TIconInfo;
   
   IconInfo.Name := 'home';
   IconInfo.DisplayName := 'Home';
